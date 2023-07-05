@@ -1,28 +1,28 @@
-import * as React from "react";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import CssBaseline from "@mui/material/CssBaseline";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import { useNavigate } from "react-router-dom";
 import Copyright from "../../components/Copyright";
 import { saveToken } from "../../utils/token";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const defaultTheme = createTheme();
 
 export default function Login() {
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    setErrorMessage("");
     let user = {
       email: event.target["email"].value,
       password: event.target["password"].value,
@@ -34,8 +34,13 @@ export default function Login() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user),
       });
-
       const data = await response.json();
+
+      if (response.status >= 400) {
+        setErrorMessage(data);
+        return;
+      }
+
       saveToken(data.accessToken, event.target["remember"].checked);
       navigate("/panel");
     } catch (e) {}
@@ -118,6 +123,13 @@ export default function Login() {
               >
                 Sign In
               </Button>
+              {errorMessage && (
+                <div
+                  style={{ color: "red", textAlign: "center", fontSize: 20 }}
+                >
+                  {errorMessage}
+                </div>
+              )}
               <Copyright sx={{ mt: 5 }} />
             </Box>
           </Box>
