@@ -1,8 +1,9 @@
-import { AddCircle, Edit } from "@mui/icons-material";
+import { AddCircle, Delete, Edit } from "@mui/icons-material";
 import { Button, Grid, IconButton, TextField } from "@mui/material";
 import React, { useState } from "react";
 import {
   useAddCategoryMutation,
+  useDeleteCategoryMutation,
   useEditCategoryMutation,
   useGetCategoriesQuery,
 } from "../../api/categories";
@@ -19,6 +20,7 @@ const Categories = () => {
   const [editModal, setEditModal] = useState(false);
   const [add] = useAddCategoryMutation();
   const [edit] = useEditCategoryMutation();
+  const [del] = useDeleteCategoryMutation();
   const [img, setImg] = useState("");
   const formik = useFormik({
     initialValues: {
@@ -87,6 +89,14 @@ const Categories = () => {
                   >
                     <Edit />
                   </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => {
+                      del(category.id);
+                    }}
+                  >
+                    <Delete />
+                  </IconButton>
                 </MuiCard>
               </Grid>
             );
@@ -134,7 +144,7 @@ const Categories = () => {
       </MuiModal>
       <MuiModal
         open={editModal}
-        handleClose={() => setAddModal(false)}
+        handleClose={() => setEditModal(false)}
         title="Edit Category"
       >
         <form onSubmit={formik_update.handleSubmit}>

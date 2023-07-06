@@ -25,6 +25,13 @@ export const categoriesApi = createApi({
       }),
       invalidatesTags: [{ type: "Category", id: "LIST" }],
     }),
+    deleteCategory: build.mutation({
+      query: (id) => ({
+        url: `categories/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Category", id: "LIST" }],
+    }),
   }),
 });
 
@@ -32,4 +39,5 @@ export const {
   useGetCategoriesQuery,
   useAddCategoryMutation,
   useEditCategoryMutation,
+  useDeleteCategoryMutation,
 } = categoriesApi;
