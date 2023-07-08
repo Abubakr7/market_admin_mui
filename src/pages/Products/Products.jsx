@@ -1,5 +1,12 @@
 import { AddCircle, Delete, Edit } from "@mui/icons-material";
-import { Button, Grid, IconButton, MenuItem, TextField } from "@mui/material";
+import {
+  Button,
+  Grid,
+  IconButton,
+  MenuItem,
+  Switch,
+  TextField,
+} from "@mui/material";
 import { useFormik } from "formik";
 import React, { useState } from "react";
 import ReactQuill from "react-quill";
@@ -266,7 +273,7 @@ const Products = () => {
                 name="brandId"
                 id="brandId"
                 select
-                label="Sub Category"
+                label="Brand"
                 value={formik.values.brandId}
                 onChange={formik.handleChange}
                 error={formik.touched.brandId && Boolean(formik.errors.brandId)}
@@ -283,6 +290,48 @@ const Products = () => {
                   ))}
               </TextField>
             </Grid>
+            <Grid item>
+              <TextField
+                id="price"
+                name="price"
+                label="Price"
+                value={formik.values.price}
+                onChange={formik.handleChange}
+                error={formik.touched.price && Boolean(formik.errors.price)}
+                helperText={formik.touched.price && formik.errors.price}
+              />
+            </Grid>
+            <Grid item flexDirection="column">
+              <span>Has Discount</span>
+              <Switch
+                id="hasDiscount"
+                name="hasDiscount"
+                value={formik.values.hasDiscount}
+                onChange={formik.handleChange}
+                error={
+                  formik.touched.hasDiscount &&
+                  Boolean(formik.errors.hasDiscount)
+                }
+                helperText={
+                  formik.touched.hasDiscount && formik.errors.hasDiscount
+                }
+              />
+            </Grid>
+            {formik.values.hasDiscount ? (
+              <Grid item>
+                <TextField
+                  id="discount"
+                  name="discount"
+                  label="discount"
+                  value={formik.values.discount}
+                  onChange={formik.handleChange}
+                  error={
+                    formik.touched.discount && Boolean(formik.errors.discount)
+                  }
+                  helperText={formik.touched.discount && formik.errors.discount}
+                />
+              </Grid>
+            ) : null}
             <Grid xs={12} sx={{ p: 2 }}>
               <ReactQuill theme="snow" value={value} onChange={setValue} />
             </Grid>
@@ -476,7 +525,7 @@ const Products = () => {
                 name="brandId"
                 id="brandId"
                 select
-                label="Sub Category"
+                label="Brand"
                 value={formik_update.values.brandId}
                 onChange={formik_update.handleChange}
                 error={
@@ -497,6 +546,22 @@ const Products = () => {
                     </MenuItem>
                   ))}
               </TextField>
+            </Grid>
+            <Grid item>
+              <TextField
+                id="price"
+                name="price"
+                label="Price"
+                value={formik_update.values.price}
+                onChange={formik_update.handleChange}
+                error={
+                  formik_update.touched.price &&
+                  Boolean(formik_update.errors.price)
+                }
+                helperText={
+                  formik_update.touched.price && formik_update.errors.price
+                }
+              />
             </Grid>
             <Grid xs={12} sx={{ p: 2 }}>
               <ReactQuill theme="snow" value={value} onChange={setValue} />
