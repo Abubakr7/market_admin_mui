@@ -1,10 +1,10 @@
-import { AddCircle, Delete } from "@mui/icons-material";
+import { AddCircle, Delete, Save } from "@mui/icons-material";
 import { IconButton, TextField } from "@mui/material";
 import React, { useState } from "react";
 
 const FormBuilder = (props) => {
-  const { fieldChange } = props;
-  const [properties, setProperties] = useState(props.properties);
+  const { fieldChange, setSubmitDisable } = props;
+  const [properties, setProperties] = useState(props.properties || []);
 
   return (
     <div
@@ -15,70 +15,89 @@ const FormBuilder = (props) => {
         gap: 10,
       }}
     >
-      {properties.map((elem) => {
-        return (
-          <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
-            <TextField
-              placeholder="key"
-              value={elem.key}
-              onChange={(e) => {
-                const copy = [
-                  ...properties.map((el) => {
-                    if (el.id === elem.id) {
-                      el.key = e.target.value;
-                    }
-                    return el;
-                  }),
-                ];
-                setProperties(copy);
-                fieldChange(copy);
-              }}
-            />
-            <TextField
-              value={elem.value}
-              placeholder="value"
-              onChange={(e) => {
-                const copy = [
-                  ...properties.map((el) => {
-                    if (el.id === elem.id) {
-                      el.value = e.target.value;
-                    }
-                    return el;
-                  }),
-                ];
-                setProperties(copy);
-                fieldChange(copy);
-              }}
-            />
+      {properties.length > 0 &&
+        properties.map((elem) => {
+          return (
+            <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+              <TextField
+                placeholder="key"
+                value={elem.key}
+                onChange={(e) => {
+                  const prop = {
+                    ...properties.find((el) => el.id === elem.id),
+                  };
+                  prop.key = e.target.value;
 
-            <IconButton
-              color="error"
-              onClick={() => {
-                const copy = [
-                  ...properties.filter((item) => item.id !== elem.id),
-                ];
-                setProperties(copy);
-                fieldChange(copy);
-              }}
-            >
-              <Delete />
-            </IconButton>
-          </div>
-        );
-      })}
-      <IconButton
-        onClick={() => {
-          let obj = {
-            id: new Date().getTime(),
-            key: "",
-            value: "",
-          };
-          const copy = [...properties, obj];
-          setProperties(copy);
-        }}
-      >
-        <AddCircle />
-      </IconButton>
+                  const copy = [
+                    ...properties.map((el) => {
+                      if (el.id === prop.id) {
+                        return prop;
+                      }
+                      return el;
+                    }),
+                  ];
+                  setProperties(copy);
+                }}
+              />
+              <TextField
+                value={elem.value}
+                placeholder="value"
+                onChange={(e) => {
+                  const prop = {
+                    ...properties.find((el) => el.id === elem.id),
+                  };
+                  prop.value = e.target.value;
+
+                  const copy = [
+                    ...properties.map((el) => {
+                      if (el.id === prop.id) {
+                        return prop;
+                      }
+                      return el;
+                    }),
+                  ];
+                  setProperties(copy);
+                }}
+              />
+
+              <IconButton
+                color="error"
+                onClick={() => {
+                  const copy = [
+                    ...properties.filter((item) => item.id !== elem.id),
+                  ];
+                  setProperties(copy);
+                }}
+              >
+                <Delete />
+              </IconButton>
+            </div>
+          );
+        })}
+      <div style={{ display: "flex", gap: 5 }}>
+        <IconButton
+          onClick={() => {
+            let obj = {
+              id: new Date().getTime(),
+              key: "",
+              value: "",
+            };
+            const copy = [...properties, obj];
+            setProperties(copy);
+            setSubmitDisable(true);
+          }}
+        >
+          <AddCircle />
+        </IconButton>
+        <IconButton
+          onClick={() => {
+            fieldChange(properties);
+            setSubmitDisable(false);
+          }}
+        >
+          <Save />
+        </IconButton>
+      </div>
     </div>
   );
 };

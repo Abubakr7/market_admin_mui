@@ -2,10 +2,12 @@ import { AddCircle, Delete, Edit } from "@mui/icons-material";
 import { Button, Grid, IconButton, MenuItem, TextField } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useState } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import * as yup from "yup";
 import { useGetBrandsQuery } from "../../api/brands";
 import { useGetCategoriesQuery } from "../../api/categories";
-import { multiFiles, singleFile } from "../../api/files";
+import { multiFiles } from "../../api/files";
 import {
   useAddProductMutation,
   useDeleteProductMutation,
@@ -14,11 +16,9 @@ import {
 } from "../../api/products";
 import { useGetSubCategoriesQuery } from "../../api/subcategories";
 import MuiCard from "../../components/Card";
+import FormBuilder from "../../components/FormBuilder";
 import ModalFull from "../../components/ModalFull";
 import Title from "../../components/Title";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import FormBuilder from "../../components/FormBuilder";
 
 const Products = () => {
   const { data = [], isLoading } = useGetProductsQuery();
@@ -33,6 +33,8 @@ const Products = () => {
   const [img, setImg] = useState("");
   const [value, setValue] = useState("");
   const [properties, setProperties] = useState([]);
+  const [editProperties, setEditProperties] = useState([]);
+  const [submitDisable, setSubmitDisable] = useState(true);
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -98,7 +100,7 @@ const Products = () => {
       let product = { ...values };
 
       product.description = value;
-      product.properties = properties;
+      product.properties = editProperties;
       if (img) {
         let formData = new FormData();
 
@@ -146,7 +148,7 @@ const Products = () => {
                       );
                       formik_update.setFieldValue("brandId", category.brandId);
                       setValue(category.description);
-                      setProperties(category.properties);
+                      setEditProperties([...category.properties]);
                       setEditModal(true);
                     }}
                   >
@@ -165,7 +167,16 @@ const Products = () => {
             );
           })}
         <Grid item alignSelf="flex-end">
-          <IconButton color="primary" onClick={() => setAddModal(true)}>
+          <IconButton
+            color="primary"
+            onClick={() => {
+              setAddModal(true);
+              setValue("");
+              setProperties([]);
+              setImg("");
+              formik.resetForm();
+            }}
+          >
             <AddCircle fontSize="large" />
           </IconButton>
         </Grid>
@@ -319,15 +330,14 @@ const Products = () => {
                       <FormBuilder
                         key={elem.id}
                         fieldChange={(values) => {
-                          const copy = [
-                            ...properties.map((item) => {
+                          setProperties((prev) => [
+                            ...prev.map((item) => {
                               if (item.id === elem.id) {
-                                item.properties = [...values];
+                                item.properties = values;
                               }
                               return item;
                             }),
-                          ];
-                          setProperties(copy);
+                          ]);
                         }}
                       />
                     </div>
@@ -493,7 +503,7 @@ const Products = () => {
             </Grid>
             <Grid item xs={12}>
               <div style={{ display: "flex", gap: 5 }}>
-                {properties.map((elem) => {
+                {editProperties.map((elem) => {
                   return (
                     <div
                       key={elem.id}
@@ -507,44 +517,55 @@ const Products = () => {
                         <TextField
                           value={elem.name}
                           onChange={(e) => {
+                            const prop = {
+                              ...editProperties.find((el) => el.id === elem.id),
+                            };
+                            prop.name = e.target.value;
                             const copy = [
-                              ...properties.map((item) => {
-                                if (item.id === elem.id) {
-                                  item.name = e.target.value;
+                              ...editProperties.map((el) => {
+                                if (el.id === prop.id) {
+                                  return prop;
                                 }
-                                return item;
+                                return el;
                               }),
                             ];
-                            setProperties(copy);
+
+                            setEditProperties(copy);
                           }}
                         />
                         <IconButton
                           color="error"
                           onClick={() => {
                             const copy = [
-                              ...properties.filter(
+                              ...editProperties.filter(
                                 (item) => item.id !== elem.id
                               ),
                             ];
-                            setProperties(copy);
+                            setEditProperties(copy);
                           }}
                         >
                           <Delete />
                         </IconButton>
                       </div>
                       <FormBuilder
+                        setSubmitDisable={setSubmitDisable}
                         key={elem.id}
                         properties={elem.properties}
                         fieldChange={(values) => {
+                          const prop = {
+                            ...editProperties.find((el) => el.id === elem.id),
+                          };
+                          prop.properties = values;
                           const copy = [
-                            ...properties.map((item) => {
-                              if (item.id === elem.id) {
-                                item.properties = [...values];
+                            ...editProperties.map((el) => {
+                              if (el.id === prop.id) {
+                                return prop;
                               }
-                              return item;
+                              return el;
                             }),
                           ];
-                          setProperties(copy);
+
+                          setEditProperties(copy);
                         }}
                       />
                     </div>
@@ -561,7 +582,7 @@ const Products = () => {
                     properties: [],
                   };
                   const copy = [...properties, obj];
-                  setProperties(copy);
+                  setEditProperties(copy);
                 }}
               >
                 Add field
@@ -583,6 +604,7 @@ const Products = () => {
                 variant="contained"
                 sx={{ mt: 3, mr: 3 }}
                 type="submit"
+                disabled={submitDisable}
               >
                 Submit
               </Button>

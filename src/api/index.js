@@ -1,6 +1,7 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/query";
+import { destroyToken } from "../utils/token";
 
-const GlobalBaseQuery = fetchBaseQuery({
+const BaseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:3000/api/",
   prepareHeaders: (headers) => {
     let token = localStorage.getItem("access_token");
@@ -12,6 +13,14 @@ const GlobalBaseQuery = fetchBaseQuery({
     return headers;
   },
 });
+
+const GlobalBaseQuery = async (args, api, extraOptions) => {
+  let result = await BaseQuery(args, api, extraOptions);
+  if (result.error && result.error.status === 401) {
+    destroyToken();
+  }
+  return result;
+};
 
 export function providesList(resultsWithIds, tagType) {
   return resultsWithIds
